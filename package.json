@@ -1,0 +1,41 @@
+{
+  "name": "student-event-pass-manager-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon --watch src --ext ts --exec ts-node src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "generate:types": "openapi-typescript openapi.yaml -o src/types/generated.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ykadam006/Student-Event-Pass-Manager-API.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Ykadam006/Student-Event-Pass-Manager-API/issues"
+  },
+  "homepage": "https://github.com/Ykadam006/Student-Event-Pass-Manager-API#readme",
+  "dependencies": {
+    "ajv-formats": "^3.0.1",
+    "express": "^5.2.1",
+    "openapi-backend": "^5.16.1",
+    "swagger-ui-express": "^5.0.1",
+    "yamljs": "^0.3.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.5.0",
+    "@types/swagger-ui-express": "^4.1.8",
+    "@types/yamljs": "^0.2.34",
+    "nodemon": "^3.1.14",
+    "openapi-typescript": "^7.13.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  }
+}

@@ -1,0 +1,383 @@
+openapi: "3.1.0"
+info:
+  title: Campus Event Pass Manager API
+  version: "1.0.0"
+  description: >
+    A contract-first REST API for managing student event passes and event capacity.
+    This API supports CRUD operations for event passes and provides capacity insights
+    through a custom analytics endpoint.
+  contact:
+    name: Yogesh Kadam
+    email: ykadam@iit.edu
+
+servers:
+  - url: http://localhost:3000
+    description: Local development server
+
+tags:
+  - name: EventPass
+    description: Operations for managing event passes
+  - name: Analytics
+    description: Capacity and registration insights
+
+paths:
+  /:
+    get:
+      tags: [EventPass]
+      summary: List all event passes
+      description: Returns all event pass records in the system.
+      operationId: EventPassService_list
+      responses:
+        "200":
+          description: A list of event passes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/EventPass"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    post:
+      tags: [EventPass]
+      summary: Create a new event pass
+      description: Creates a new event pass record.
+      operationId: EventPassService_create
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EventPassCreate"
+      responses:
+        "201":
+          description: Event pass created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EventPass"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /capacity-insights:
+    get:
+      tags: [Analytics]
+      summary: Get event capacity insights
+      description: Returns derived analytics about event capacity and registrations.
+      operationId: EventPassService_capacityInsights
+      responses:
+        "200":
+          description: Capacity insight summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CapacityInsights"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /{id}:
+    get:
+      tags: [EventPass]
+      summary: Get an event pass by ID
+      description: Retrieves one event pass using its unique ID.
+      operationId: EventPassService_get
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Unique identifier of the event pass
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Event pass found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EventPass"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Event pass not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    patch:
+      tags: [EventPass]
+      summary: Partially update an event pass
+      description: Updates one or more fields of an event pass.
+      operationId: EventPassService_update
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Unique identifier of the event pass
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EventPassUpdate"
+      responses:
+        "200":
+          description: Event pass updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EventPass"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Event pass not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    delete:
+      tags: [EventPass]
+      summary: Delete an event pass
+      description: Deletes an event pass by ID.
+      operationId: EventPassService_delete
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Unique identifier of the event pass
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Event pass deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeleteResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Event pass not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+components:
+  schemas:
+    EventPass:
+      type: object
+      description: Represents an event pass record.
+      required:
+        - id
+        - eventName
+        - category
+        - venue
+        - eventDate
+        - capacity
+        - registeredCount
+        - passType
+      properties:
+        id:
+          type: string
+          readOnly: true
+          description: Auto-generated unique identifier for the event pass
+        eventName:
+          type: string
+          description: Name of the event
+        category:
+          type: string
+          description: Category of the event
+          enum: [Workshop, Hackathon, Seminar, Networking, CareerFair]
+        venue:
+          type: string
+          description: Location of the event
+        eventDate:
+          type: string
+          format: date
+          description: Scheduled event date
+        capacity:
+          type: integer
+          format: int32
+          description: Maximum number of attendees allowed
+        registeredCount:
+          type: integer
+          format: int32
+          description: Number of attendees currently registered
+        passType:
+          type: string
+          description: Type of pass issued for the event
+          enum: [Free, Standard, VIP]
+      example:
+        id: "evt_001"
+        eventName: "Scarlet Hacks Kickoff"
+        category: "Hackathon"
+        venue: "Downtown Campus Room 470"
+        eventDate: "2026-04-04"
+        capacity: 300
+        registeredCount: 275
+        passType: "Free"
+
+    EventPassCreate:
+      type: object
+      description: Input schema for creating an event pass.
+      required:
+        - eventName
+        - category
+        - venue
+        - eventDate
+        - capacity
+        - registeredCount
+        - passType
+      properties:
+        eventName:
+          type: string
+          description: Name of the event
+        category:
+          type: string
+          description: Category of the event
+          enum: [Workshop, Hackathon, Seminar, Networking, CareerFair]
+        venue:
+          type: string
+          description: Location of the event
+        eventDate:
+          type: string
+          format: date
+          description: Scheduled event date
+        capacity:
+          type: integer
+          format: int32
+          description: Maximum number of attendees allowed
+        registeredCount:
+          type: integer
+          format: int32
+          description: Number of attendees currently registered
+        passType:
+          type: string
+          description: Type of pass issued for the event
+          enum: [Free, Standard, VIP]
+
+    EventPassUpdate:
+      type: object
+      description: Input schema for partially updating an event pass.
+      properties:
+        eventName:
+          type: string
+          description: Name of the event
+        category:
+          type: string
+          description: Category of the event
+          enum: [Workshop, Hackathon, Seminar, Networking, CareerFair]
+        venue:
+          type: string
+          description: Location of the event
+        eventDate:
+          type: string
+          format: date
+          description: Scheduled event date
+        capacity:
+          type: integer
+          format: int32
+          description: Maximum number of attendees allowed
+        registeredCount:
+          type: integer
+          format: int32
+          description: Number of attendees currently registered
+        passType:
+          type: string
+          description: Type of pass issued for the event
+          enum: [Free, Standard, VIP]
+
+    CapacityInsights:
+      type: object
+      description: Derived event capacity analytics.
+      properties:
+        totalEvents:
+          type: integer
+          description: Total number of events
+        soldOutEvents:
+          type: integer
+          description: Number of events where registrations meet or exceed capacity
+        nearlyFullEvents:
+          type: integer
+          description: Number of events with fill rate of 80 percent or more
+        averageFillRate:
+          type: number
+          description: Average event fill rate across all events
+        urgentEvents:
+          type: array
+          description: Events that are close to reaching full capacity
+          items:
+            $ref: "#/components/schemas/UrgentEvent"
+        categoryBreakdown:
+          type: array
+          description: Summary of event counts by category
+          items:
+            $ref: "#/components/schemas/CategoryBreakdown"
+
+    UrgentEvent:
+      type: object
+      description: Event that requires attention due to high occupancy.
+      properties:
+        id:
+          type: string
+        eventName:
+          type: string
+        fillRate:
+          type: number
+
+    CategoryBreakdown:
+      type: object
+      description: Event count for one category.
+      properties:
+        category:
+          type: string
+        count:
+          type: integer
+
+    DeleteResponse:
+      type: object
+      description: Response after deleting an event pass.
+      properties:
+        message:
+          type: string
+          description: Delete confirmation message
+
+    ErrorResponse:
+      type: object
+      description: Standard error response.
+      properties:
+        code:
+          type: integer
+          description: HTTP error status code
+        message:
+          type: string
+          description: Error message
