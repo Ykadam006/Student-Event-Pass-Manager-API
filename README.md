@@ -110,9 +110,26 @@ npm start
 
 ## Deployed URL
 
-> Update this section after deploying to Render.
+> Update `your-app-name` below after Azure App Service is created.
 
-`https://<your-render-service>.onrender.com/docs`
+| Endpoint | URL |
+|---|---|
+| Swagger UI | `https://your-app-name.azurewebsites.net/docs` |
+| OpenAPI YAML | `https://your-app-name.azurewebsites.net/openapi.yaml` |
+| OpenAPI JSON | `https://your-app-name.azurewebsites.net/openapi.json` |
+| List all passes | `https://your-app-name.azurewebsites.net/` |
+| Capacity insights | `https://your-app-name.azurewebsites.net/capacity-insights` |
+
+## Azure Deployment
+
+This app is deployed on **Azure App Service** (Linux, Node 24 LTS).
+
+**Deploy steps:**
+1. Push to GitHub (do not push `node_modules`)
+2. Create an Azure App Service — Publish: Code, Runtime: Node 24 LTS, OS: Linux
+3. In the App Service → Deployment Center, connect your GitHub repo and branch
+4. Azure automatically runs `npm install && npm run build` then `npm start`
+5. After the URL is assigned, replace `your-app-name` in `openapi.yaml` `servers` and redeploy
 
 ---
 

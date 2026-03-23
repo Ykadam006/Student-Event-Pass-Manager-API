@@ -11,6 +11,8 @@ info:
     email: ykadam@iit.edu
 
 servers:
+  - url: https://your-app-name.azurewebsites.net
+    description: Production server (Azure App Service)
   - url: http://localhost:3000
     description: Local development server
 
