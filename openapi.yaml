@@ -8,7 +8,7 @@ info:
     through a custom analytics endpoint.
   contact:
     name: Yogesh Kadam
-    email: ykadam@iit.edu
+    email: ykadam1@hawk.illinoistech.edu
 
 servers:
   - url: https://student-event-pass-manager-api-gxetbzfvfefdakeb.eastus-01.azurewebsites.net
