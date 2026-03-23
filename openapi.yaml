@@ -11,7 +11,7 @@ info:
     email: ykadam@iit.edu
 
 servers:
-  - url: https://your-app-name.azurewebsites.net
+  - url: https://student-event-pass-manager-api-gxetbzfvfefdakeb.eastus-01.azurewebsites.net
     description: Production server (Azure App Service)
   - url: http://localhost:3000
     description: Local development server

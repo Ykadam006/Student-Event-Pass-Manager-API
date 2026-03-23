@@ -110,15 +110,13 @@ npm start
 
 ## Deployed URL
 
-> Update `your-app-name` below after Azure App Service is created.
-
 | Endpoint | URL |
 |---|---|
-| Swagger UI | `https://your-app-name.azurewebsites.net/docs` |
-| OpenAPI YAML | `https://your-app-name.azurewebsites.net/openapi.yaml` |
-| OpenAPI JSON | `https://your-app-name.azurewebsites.net/openapi.json` |
-| List all passes | `https://your-app-name.azurewebsites.net/` |
-| Capacity insights | `https://your-app-name.azurewebsites.net/capacity-insights` |
+| Swagger UI | https://student-event-pass-manager-api-gxetbzfvfefdakeb.eastus-01.azurewebsites.net/docs |
+| OpenAPI YAML | https://student-event-pass-manager-api-gxetbzfvfefdakeb.eastus-01.azurewebsites.net/openapi.yaml |
+| OpenAPI JSON | https://student-event-pass-manager-api-gxetbzfvfefdakeb.eastus-01.azurewebsites.net/openapi.json |
+| List all passes | https://student-event-pass-manager-api-gxetbzfvfefdakeb.eastus-01.azurewebsites.net/ |
+| Capacity insights | https://student-event-pass-manager-api-gxetbzfvfefdakeb.eastus-01.azurewebsites.net/capacity-insights |
 
 ## Azure Deployment
 
@@ -129,7 +127,6 @@ This app is deployed on **Azure App Service** (Linux, Node 24 LTS).
 2. Create an Azure App Service — Publish: Code, Runtime: Node 24 LTS, OS: Linux
 3. In the App Service → Deployment Center, connect your GitHub repo and branch
 4. Azure automatically runs `npm install && npm run build` then `npm start`
-5. After the URL is assigned, replace `your-app-name` in `openapi.yaml` `servers` and redeploy
 
 ---
 
