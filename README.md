@@ -4,6 +4,66 @@ A contract-first REST API for managing student event passes at a university camp
 
 ---
 
+## Midterm assignment alignment (course PDF)
+
+This repo is structured for **Midterm Presentation — From Prototype to Production** (database integration, generated client, cloud deployment, 10‑minute presentation). Below is a direct mapping to the official deliverables and checklist.
+
+### Submission artifacts (due ≥24 hours before your presentation slot)
+
+| # | Required artifact | This project |
+|---|-------------------|--------------|
+| 1 | **GitHub repository** — updated server, generated client directory, client app source, README | [github.com/Ykadam006/Student-Event-Pass-Manager-API](https://github.com/Ykadam006/Student-Event-Pass-Manager-API) |
+| 2 | **Live API URL** — public `/docs` backed by cloud DB | [Azure Swagger UI](https://student-event-pass-manager-api-gxetbzfvfefdakeb.eastus-01.azurewebsites.net/docs) |
+| 3 | **Live client URL** — talks to **deployed** API, not localhost | [Vercel client](https://student-event-pass-manager-api.vercel.app/) |
+| 4 | **Slide deck** (PDF or shared Slides/PowerPoint link) | *You upload per syllabus; use the outline below.* |
+
+### Client generation tool (README deliverable)
+
+| Item | Detail |
+|------|--------|
+| **Tool** | [**@hey-api/openapi-ts**](https://github.com/hey-api/openapi-ts) (`openapi-ts` CLI) with [**@hey-api/client-fetch**](https://heyapi.dev) |
+| **Command** | `npm run generate:client` |
+| **Output** | Committed under **`generated-client/`** (do not edit by hand) |
+| **SDK ↔ spec** | Each `operationId` in `openapi.yaml` maps to `eventPassService*` in `generated-client/sdk.gen.ts` (see table under [operationId Mapping](#operationid-mapping)) |
+
+### Minimal client requirements (Part 2)
+
+The Vite app in **`client/`** calls **only** the generated SDK (`eventPassServiceList`, `eventPassServiceCreate`, `eventPassServiceDelete`, `eventPassServiceCapacityInsights`). It does **not** use raw `fetch`/`axios` for API routes. Default API host is the **first** entry in `openapi.yaml` `servers` (Azure production).
+
+### Pre-submission checklist (mirror of assignment §11)
+
+**Implemented in this repository (verify live before your slot):**
+
+- [x] Cloud database: **Supabase (PostgreSQL)**; all six operations use `src/store/eventPasses.ts` (no in-memory store).
+- [x] Seed data: `supabase/schema.sql` — run in Supabase SQL Editor; API returns the same resource shape as the OpenAPI schemas.
+- [x] Credentials: `SUPABASE_*` via environment variables only; **`.env.example`** at repo root; **`client/.env.example`** for optional `VITE_API_BASE_URL`.
+- [x] Generated client committed under **`generated-client/`**.
+- [x] Client uses generated SDK only (no hand-written HTTP for those calls).
+- [x] Client demonstrates **list, create, delete**, and **custom** (`/capacity-insights`) against the live API when built without overriding the base URL.
+- [x] `openapi.yaml` **servers** includes the deployed Azure URL (first server = default SDK base).
+- [x] **`/openapi.yaml`**, **`/openapi.json`**, and **`/docs`** are served by the API (see `src/server.ts`).
+
+**You must still confirm manually (grading / demo):**
+
+- [ ] **POST** creates a row that **survives** an API restart (Supabase persistence).
+- [ ] **Swagger UI** on Azure: every **Try it out** operation succeeds.
+- [ ] **Vercel** build uses `VITE_API_BASE_URL` if needed so the client hits Azure (default build uses spec’s first server).
+- [ ] **Slide deck** submitted as PDF or link; **rehearse** to fit **10 minutes** (8–12 min window per rubric).
+- [ ] **Backup demo** (screenshots or short recording) if live network fails during presentation.
+
+### Presentation structure (assignment §9 — for your slide deck)
+
+Use this as the spine for your **10‑minute** deck; demo in the browser, not only slides.
+
+1. **~1 min — Introduction** — Campus event passes domain, main resource, one architecture diagram (browser → client → API → Supabase).
+2. **~2 min — OpenAPI** — Key schemas, enums, `operationIds`; show live **`/docs`** briefly.
+3. **~2 min — Database** — Why Supabase/Postgres; show **`event_passes`** structure (`supabase/schema.sql`); only the **store** layer changed vs Assignment 1.
+4. **~2 min — Client generation** — Hey API tool, what landed in `generated-client/`; one code snippet of `eventPassServiceCreate` (or similar) from `client/src/main.ts`.
+5. **~2 min — Live demo** — Client: create → **Swagger** shows new row → list + **capacity insights** → optional Supabase **Table Editor** to show persistence.
+6. **~1 min — Lessons learned** — Contract-first: one spec for validation, docs, and client.
+
+---
+
 ## Why This Domain
 
 Campus events are central to student life — hackathons, workshops, seminars, career fairs, and networking nights all require ticketing and capacity management. This domain is practical, easy to reason about, and naturally supports both standard CRUD operations and a meaningful custom analytics endpoint (capacity insights).
@@ -19,7 +79,7 @@ Campus events are central to student life — hackathons, workshops, seminars, c
 | openapi-backend | Spec-driven request routing and validation |
 | swagger-ui-express | Serves the interactive Swagger UI at `/docs` |
 | yamljs | Parses the YAML spec for `/openapi.json` |
-| ts-node / nodemon | Local development workflow |
+| tsx / nodemon | Local development workflow (`npm run dev`) |
 | openapi-typescript | Optional generated types from the YAML spec |
 | Supabase (PostgreSQL) | Cloud database for event passes |
 | @supabase/supabase-js | Server-side access with the service role key |
