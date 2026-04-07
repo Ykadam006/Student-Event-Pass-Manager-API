@@ -71,6 +71,12 @@ api.register({
 });
 
 async function start(): Promise<void> {
+  if (!process.env.SUPABASE_URL?.trim() || !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()) {
+    console.warn(
+      "[config] SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY is missing — GET / and other data routes will return 500. Set them in .env (local) or Application settings (Azure)."
+    );
+  }
+
   try {
     await api.init();
   } catch (err) {

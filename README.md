@@ -244,13 +244,21 @@ This app is deployed on **Azure App Service** (Linux, Node 24 LTS).
 
 Without these, the API responds with `500` on data routes.
 
+### Azure returns 500 on `GET /` (browser or curl)
+
+A JSON body like `{"code":500,"message":"Internal Server Error"}` comes from your handlers when **Supabase** throws (almost always **missing or wrong** `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` in **Azure → App Service → Settings → Environment variables**). Fix the values, save, wait for the app to restart, and try again. Check **Log stream** in the portal for `[config]` warnings or stack traces.
+
+### `ReferenceError: cors is not defined`
+
+That was from an older `server.ts` that still called `cors()` after the `cors` package was removed. Use the current file (manual `setCorsHeaders` only), then run `npm run build` and restart `npm run dev`.
+
 Redeploy the API after midterm changes so **CORS** and any updates are live.
 
-### Live client URL (fill in after you deploy `client/dist`)
+### Live client URL
 
 | | URL |
 |---|---|
-| **Midterm client (static site)** | _Add your Vercel / Netlify / GitHub Pages URL here_ |
+| **Midterm client (static site)** | https://student-event-pass-manager-api.vercel.app/ |
 
 ---
 
