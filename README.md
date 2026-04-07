@@ -21,6 +21,11 @@ Campus events are central to student life — hackathons, workshops, seminars, c
 | yamljs | Parses the YAML spec for `/openapi.json` |
 | ts-node / nodemon | Local development workflow |
 | openapi-typescript | Optional generated types from the YAML spec |
+| Supabase (PostgreSQL) | Cloud database for event passes |
+| @supabase/supabase-js | Server-side access with the service role key |
+| dotenv | Loads `SUPABASE_*` variables from `.env` locally |
+| **@hey-api/openapi-ts** | Generates the typed fetch SDK in `generated-client/` from `openapi.yaml` |
+| Vite | Builds the minimal browser client in `client/` |
 
 ---
 
@@ -29,14 +34,24 @@ Campus events are central to student life — hackathons, workshops, seminars, c
 ```
 student-event-pass-manager-api/
 ├── openapi.yaml                          ← Contract (single source of truth)
+├── generated-client/                     ← Generated SDK (npm run generate:client) — do not edit by hand
+├── client/                               ← Minimal SPA using only the generated SDK
+│   ├── index.html
+│   ├── src/main.ts
+│   └── vite.config.cjs
+├── supabase/
+│   └── schema.sql                        ← Table + seed data (run in Supabase SQL Editor)
 ├── package.json
 ├── tsconfig.json
+├── .env.example                          ← Template for local secrets (copy to .env)
 └── src/
-    ├── server.ts                         ← Express app + openapi-backend wiring
+    ├── server.ts                         ← Express + explicit CORS headers + openapi-backend
+    ├── lib/
+    │   └── supabase.ts                   ← Supabase client (service role)
     ├── types/
     │   └── eventPass.ts                  ← TypeScript interfaces mirroring YAML schemas
     ├── store/
-    │   └── eventPasses.ts                ← In-memory data store with 5 seed records
+    │   └── eventPasses.ts                ← Database access layer (CRUD + insights)
     └── handlers/
         ├── EventPassService_list.ts
         ├── EventPassService_create.ts
@@ -61,6 +76,19 @@ Each `operationId` in `openapi.yaml` maps directly to one handler file:
 | `EventPassService_delete` | `src/handlers/EventPassService_delete.ts` |
 | `EventPassService_capacityInsights` | `src/handlers/EventPassService_capacityInsights.ts` |
 
+### Generated SDK mapping (midterm)
+
+The **@hey-api/openapi-ts** client in `generated-client/sdk.gen.ts` maps each `operationId` to a camelCase function:
+
+| operationId | SDK function |
+|---|---|
+| `EventPassService_list` | `eventPassServiceList` |
+| `EventPassService_create` | `eventPassServiceCreate` |
+| `EventPassService_get` | `eventPassServiceGet` |
+| `EventPassService_update` | `eventPassServiceUpdate` |
+| `EventPassService_delete` | `eventPassServiceDelete` |
+| `EventPassService_capacityInsights` | `eventPassServiceCapacityInsights` |
+
 ---
 
 ## API Endpoints
@@ -79,12 +107,89 @@ Each `operationId` in `openapi.yaml` maps directly to one handler file:
 
 ---
 
+## Supabase database
+
+1. In the [Supabase dashboard](https://supabase.com/dashboard), open your project → **SQL Editor**.
+2. Paste and run the contents of `supabase/schema.sql`. That creates `public.event_passes`, enables RLS, and inserts the five seed rows (`on conflict do nothing` so it is safe to re-run).
+3. Under **Project Settings → API**, copy **Project URL** and the **service_role** key (server only; never expose it in a browser app).
+
+The API uses the **service role** key so it can read and write regardless of RLS policies.
+
+### Database schema (summary)
+
+Table **`public.event_passes`** (PostgreSQL on Supabase):
+
+| Column | Type | Notes |
+|--------|------|--------|
+| `id` | `text` | Primary key |
+| `event_name` | `text` | Maps to API `eventName` |
+| `category` | `text` | Enum: Workshop, Hackathon, Seminar, Networking, CareerFair |
+| `venue` | `text` | |
+| `event_date` | `date` | Maps to API `eventDate` (`YYYY-MM-DD`) |
+| `capacity` | `integer` | \> 0 |
+| `registered_count` | `integer` | ≥ 0; maps to API `registeredCount` |
+| `pass_type` | `text` | Enum: Free, Standard, VIP |
+
+Full DDL and seed inserts are in `supabase/schema.sql`.
+
+---
+
+## Generate the typed API client (midterm)
+
+Tool: [**@hey-api/openapi-ts**](https://github.com/hey-api/openapi-ts) with the **`@hey-api/client-fetch`** template.
+
+```bash
+npm run generate:client
+```
+
+Output directory: **`generated-client/`** (committed). Regenerate whenever `openapi.yaml` changes.
+
+---
+
+## Browser client (midterm)
+
+The **`client/`** app is a small Vite + TypeScript page. It performs **list**, **create**, **delete**, and **capacity insights** using **only** the generated SDK (`eventPassServiceList`, `eventPassServiceCreate`, `eventPassServiceDelete`, `eventPassServiceCapacityInsights`). It does not call `fetch` directly for those operations.
+
+### Run the client locally
+
+```bash
+# Terminal 1 — API (optional if you only hit Azure)
+npm run dev
+
+# Terminal 2 — client dev server
+npm run client:dev
+```
+
+Open **http://localhost:5173**. By default the SDK uses the **first** `servers` URL from `openapi.yaml` (your Azure API). To call a local API instead, copy `client/.env.example` to `client/.env` and set:
+
+```bash
+VITE_API_BASE_URL=http://localhost:3000
+```
+
+### Build static client (for Netlify / Vercel / GitHub Pages)
+
+```bash
+npm install
+npm run generate:client
+npm run client:build
+```
+
+Static files are written to **`client/dist/`**. Point your host’s publish directory to **`client/dist`**. Build command example on Vercel/Netlify:
+
+`npm install && npm run generate:client && npm run client:build`
+
+After deploy, add your **live client URL** to the midterm submission. The API sets **`Access-Control-Allow-Origin`** on every response (reflecting the browser `Origin`, e.g. `http://localhost:5173`) so the Vite client can call Azure cross-origin. **Push and redeploy** after CORS changes or the browser will show “blocked by CORS policy”.
+
+---
+
 ## Local Setup
 
 ```bash
 git clone https://github.com/Ykadam006/Student-Event-Pass-Manager-API.git
 cd Student-Event-Pass-Manager-API
 npm install
+cp .env.example .env
+# Edit .env: set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY
 ```
 
 ## Run Locally
@@ -92,6 +197,8 @@ npm install
 ```bash
 npm run dev
 ```
+
+Development uses **`tsx`** (via nodemon) so the Node process stays running; plain `ts-node` can exit immediately after startup on some setups.
 
 The server starts at `http://localhost:3000`.
 
@@ -123,10 +230,27 @@ npm start
 This app is deployed on **Azure App Service** (Linux, Node 24 LTS).
 
 **Deploy steps:**
-1. Push to GitHub (do not push `node_modules`)
+1. Push to GitHub (do not push `node_modules` or `.env`)
 2. Create an Azure App Service — Publish: Code, Runtime: Node 24 LTS, OS: Linux
 3. In the App Service → Deployment Center, connect your GitHub repo and branch
 4. Azure automatically runs `npm install && npm run build` then `npm start`
+
+**Required application settings (Settings → Environment variables):**
+
+| Name | Value |
+|---|---|
+| `SUPABASE_URL` | Your Supabase project URL |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role secret |
+
+Without these, the API responds with `500` on data routes.
+
+Redeploy the API after midterm changes so **CORS** and any updates are live.
+
+### Live client URL (fill in after you deploy `client/dist`)
+
+| | URL |
+|---|---|
+| **Midterm client (static site)** | _Add your Vercel / Netlify / GitHub Pages URL here_ |
 
 ---
 

@@ -1,106 +1,131 @@
+import { getSupabase } from "../lib/supabase";
 import {
   CapacityInsights,
   EventPass,
   EventPassCreate,
   EventPassUpdate,
+  EventCategory,
+  PassType,
 } from "../types/eventPass";
 
-const eventPasses: EventPass[] = [
-  {
-    id: "evt_001",
-    eventName: "Scarlet Hacks Kickoff",
-    category: "Hackathon",
-    venue: "Downtown Campus Room 470",
-    eventDate: "2026-04-04",
-    capacity: 300,
-    registeredCount: 275,
-    passType: "Free",
-  },
-  {
-    id: "evt_002",
-    eventName: "Frontend Bootcamp",
-    category: "Workshop",
-    venue: "Tech Lab A",
-    eventDate: "2026-04-12",
-    capacity: 60,
-    registeredCount: 60,
-    passType: "Standard",
-  },
-  {
-    id: "evt_003",
-    eventName: "AI Research Seminar",
-    category: "Seminar",
-    venue: "Engineering Hall 201",
-    eventDate: "2026-04-20",
-    capacity: 120,
-    registeredCount: 70,
-    passType: "Free",
-  },
-  {
-    id: "evt_004",
-    eventName: "Startup Networking Night",
-    category: "Networking",
-    venue: "Innovation Center",
-    eventDate: "2026-04-25",
-    capacity: 90,
-    registeredCount: 78,
-    passType: "VIP",
-  },
-  {
-    id: "evt_005",
-    eventName: "Spring Career Fair",
-    category: "CareerFair",
-    venue: "Main Auditorium",
-    eventDate: "2026-05-01",
-    capacity: 500,
-    registeredCount: 410,
-    passType: "Standard",
-  },
-];
+type EventPassRow = {
+  id: string;
+  event_name: string;
+  category: string;
+  venue: string;
+  event_date: string;
+  capacity: number;
+  registered_count: number;
+  pass_type: string;
+};
+
+function rowToEventPass(row: EventPassRow): EventPass {
+  return {
+    id: row.id,
+    eventName: row.event_name,
+    category: row.category as EventCategory,
+    venue: row.venue,
+    eventDate: row.event_date.slice(0, 10),
+    capacity: row.capacity,
+    registeredCount: row.registered_count,
+    passType: row.pass_type as PassType,
+  };
+}
 
 function generateId(): string {
   return `evt_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
 }
 
-export function findAll(): EventPass[] {
-  return eventPasses;
+export async function findAll(): Promise<EventPass[]> {
+  const { data, error } = await getSupabase()
+    .from("event_passes")
+    .select("*")
+    .order("event_date", { ascending: true });
+
+  if (error) throw error;
+  return (data as EventPassRow[] | null)?.map(rowToEventPass) ?? [];
 }
 
-export function findById(id: string): EventPass | undefined {
-  return eventPasses.find((ep) => ep.id === id);
+export async function findById(id: string): Promise<EventPass | undefined> {
+  const { data, error } = await getSupabase()
+    .from("event_passes")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!data) return undefined;
+  return rowToEventPass(data as EventPassRow);
 }
 
-export function create(body: EventPassCreate): EventPass {
-  const newEventPass: EventPass = {
-    id: generateId(),
-    ...body,
+export async function create(body: EventPassCreate): Promise<EventPass> {
+  const id = generateId();
+  const row = {
+    id,
+    event_name: body.eventName,
+    category: body.category,
+    venue: body.venue,
+    event_date: body.eventDate,
+    capacity: body.capacity,
+    registered_count: body.registeredCount,
+    pass_type: body.passType,
   };
-  eventPasses.push(newEventPass);
-  return newEventPass;
+
+  const { data, error } = await getSupabase()
+    .from("event_passes")
+    .insert(row)
+    .select("*")
+    .single();
+
+  if (error) throw error;
+  return rowToEventPass(data as EventPassRow);
 }
 
-export function update(id: string, body: EventPassUpdate): EventPass | undefined {
-  const index = eventPasses.findIndex((ep) => ep.id === id);
-  if (index === -1) return undefined;
-  eventPasses[index] = { ...eventPasses[index], ...body };
-  return eventPasses[index];
+export async function update(
+  id: string,
+  body: EventPassUpdate
+): Promise<EventPass | undefined> {
+  const patch: Partial<EventPassRow> = {};
+  if (body.eventName !== undefined) patch.event_name = body.eventName;
+  if (body.category !== undefined) patch.category = body.category;
+  if (body.venue !== undefined) patch.venue = body.venue;
+  if (body.eventDate !== undefined) patch.event_date = body.eventDate;
+  if (body.capacity !== undefined) patch.capacity = body.capacity;
+  if (body.registeredCount !== undefined) patch.registered_count = body.registeredCount;
+  if (body.passType !== undefined) patch.pass_type = body.passType;
+
+  if (Object.keys(patch).length === 0) {
+    return findById(id);
+  }
+
+  const { data, error } = await getSupabase()
+    .from("event_passes")
+    .update(patch)
+    .eq("id", id)
+    .select("*");
+
+  if (error) throw error;
+  if (!data?.length) return undefined;
+  return rowToEventPass(data[0] as EventPassRow);
 }
 
-export function remove(id: string): boolean {
-  const index = eventPasses.findIndex((ep) => ep.id === id);
-  if (index === -1) return false;
-  eventPasses.splice(index, 1);
-  return true;
+export async function remove(id: string): Promise<boolean> {
+  const { data, error } = await getSupabase()
+    .from("event_passes")
+    .delete()
+    .eq("id", id)
+    .select("id");
+
+  if (error) throw error;
+  return (data?.length ?? 0) > 0;
 }
 
-export function getCapacityInsights(): CapacityInsights {
-  const totalEvents = eventPasses.length;
+function computeCapacityInsights(rows: EventPass[]): CapacityInsights {
+  const totalEvents = rows.length;
 
-  const soldOutEvents = eventPasses.filter(
-    (ep) => ep.registeredCount >= ep.capacity
-  ).length;
+  const soldOutEvents = rows.filter((ep) => ep.registeredCount >= ep.capacity).length;
 
-  const nearlyFullEvents = eventPasses.filter(
+  const nearlyFullEvents = rows.filter(
     (ep) => ep.registeredCount / ep.capacity >= 0.8
   ).length;
 
@@ -109,14 +134,12 @@ export function getCapacityInsights(): CapacityInsights {
       ? 0
       : Number(
           (
-            eventPasses.reduce(
-              (sum, ep) => sum + ep.registeredCount / ep.capacity,
-              0
-            ) / totalEvents
+            rows.reduce((sum, ep) => sum + ep.registeredCount / ep.capacity, 0) /
+            totalEvents
           ).toFixed(2)
         );
 
-  const urgentEvents = eventPasses
+  const urgentEvents = rows
     .filter((ep) => ep.registeredCount / ep.capacity >= 0.8)
     .map((ep) => ({
       id: ep.id,
@@ -125,13 +148,14 @@ export function getCapacityInsights(): CapacityInsights {
     }));
 
   const categoryMap = new Map<string, number>();
-  for (const ep of eventPasses) {
+  for (const ep of rows) {
     categoryMap.set(ep.category, (categoryMap.get(ep.category) ?? 0) + 1);
   }
 
-  const categoryBreakdown = Array.from(categoryMap.entries()).map(
-    ([category, count]) => ({ category, count })
-  );
+  const categoryBreakdown = Array.from(categoryMap.entries()).map(([category, count]) => ({
+    category,
+    count,
+  }));
 
   return {
     totalEvents,
@@ -141,4 +165,9 @@ export function getCapacityInsights(): CapacityInsights {
     urgentEvents,
     categoryBreakdown,
   };
+}
+
+export async function getCapacityInsights(): Promise<CapacityInsights> {
+  const rows = await findAll();
+  return computeCapacityInsights(rows);
 }

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Campus Event Pass Manager</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <div class="load-bar" id="load-bar" aria-hidden="true"></div>
+
+    <div class="app">
+      <header class="top">
+        <div class="top__intro">
+          <p class="eyebrow">Midterm · OpenAPI generated client</p>
+          <h1>Campus Event Pass Manager</h1>
+          <p class="lede">
+            End-to-end demo: this UI calls your REST API only through the
+            <strong>typed SDK</strong> from <code>generated-client/</code> (no hand-written
+            <code>fetch</code> for API routes).
+          </p>
+        </div>
+
+        <div class="conn card">
+          <div class="conn__row">
+            <span class="conn__label">API base URL</span>
+            <span class="pill pill--sdk" id="conn-mode">SDK</span>
+          </div>
+          <code class="conn__url" id="api-base" title="From openapi.yaml or VITE_API_BASE_URL"></code>
+          <div class="conn__actions">
+            <button type="button" class="btn btn--ghost btn--sm" id="btn-ping">Test connection</button>
+            <span class="conn__status" id="conn-status" data-state="idle">Not tested</span>
+          </div>
+          <p class="conn__hint">
+            Override with <code>client/.env</code> → <code>VITE_API_BASE_URL=http://localhost:3000</code>
+            for local API + <code>npm run dev</code>.
+          </p>
+        </div>
+      </header>
+
+      <div class="grid">
+        <div class="col">
+          <section class="card block">
+            <h2 class="block__title">Read &amp; analytics</h2>
+            <p class="block__desc">Uses <code>eventPassServiceList</code> and <code>eventPassServiceCapacityInsights</code>.</p>
+            <div class="btn-row">
+              <button type="button" class="btn btn--primary" id="btn-list">List all passes</button>
+              <button type="button" class="btn btn--secondary" id="btn-insights">Capacity insights</button>
+            </div>
+          </section>
+
+          <section class="card block">
+            <h2 class="block__title">Create pass</h2>
+            <p class="block__desc">Uses <code>eventPassServiceCreate</code>.</p>
+            <form id="form-create" class="form">
+              <div class="form__grid">
+                <label class="field">
+                  <span class="field__label">Event name</span>
+                  <input name="eventName" type="text" required placeholder="e.g. Spring Tech Mixer" />
+                </label>
+                <label class="field">
+                  <span class="field__label">Category</span>
+                  <select name="category" required>
+                    <option value="Workshop">Workshop</option>
+                    <option value="Hackathon">Hackathon</option>
+                    <option value="Seminar">Seminar</option>
+                    <option value="Networking">Networking</option>
+                    <option value="CareerFair">CareerFair</option>
+                  </select>
+                </label>
+                <label class="field field--wide">
+                  <span class="field__label">Venue</span>
+                  <input name="venue" type="text" required placeholder="Building & room" />
+                </label>
+                <label class="field">
+                  <span class="field__label">Event date</span>
+                  <input name="eventDate" type="date" required />
+                </label>
+                <label class="field">
+                  <span class="field__label">Capacity</span>
+                  <input name="capacity" type="number" min="1" required />
+                </label>
+                <label class="field">
+                  <span class="field__label">Registered</span>
+                  <input name="registeredCount" type="number" min="0" required />
+                </label>
+                <label class="field">
+                  <span class="field__label">Pass type</span>
+                  <select name="passType" required>
+                    <option value="Free">Free</option>
+                    <option value="Standard">Standard</option>
+                    <option value="VIP">VIP</option>
+                  </select>
+                </label>
+              </div>
+              <button type="submit" class="btn btn--primary">Create pass</button>
+            </form>
+          </section>
+
+          <section class="card block">
+            <h2 class="block__title">Delete pass</h2>
+            <p class="block__desc">Uses <code>eventPassServiceDelete</code>.</p>
+            <div class="delete-row">
+              <input
+                id="delete-id"
+                class="input-grow"
+                type="text"
+                placeholder="Pass id from list or after create"
+                autocomplete="off"
+              />
+              <button type="button" class="btn btn--danger" id="btn-delete">Delete</button>
+            </div>
+          </section>
+
+          <footer class="foot card">
+            <a
+              class="link"
+              id="link-docs"
+              href="#"
+              target="_blank"
+              rel="noopener noreferrer"
+            >Open Swagger UI (/docs)</a>
+            <span class="dot">·</span>
+            <span class="muted">Run API: <code>npm run dev</code> · Client: <code>npm run client:dev</code></span>
+          </footer>
+        </div>
+
+        <section class="card out card--sticky">
+          <div class="out__head">
+            <h2 class="block__title block__title--sm">Response</h2>
+            <span class="tag" id="output-tag" data-kind="idle">Ready</span>
+          </div>
+          <pre class="out__body" id="output">Run an action to see JSON from the API.</pre>
+        </section>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
