@@ -15,7 +15,7 @@ This repo is structured for **Midterm Presentation — From Prototype to Product
 | 1 | **GitHub repository** — updated server, generated client directory, client app source, README | [github.com/Ykadam006/Student-Event-Pass-Manager-API](https://github.com/Ykadam006/Student-Event-Pass-Manager-API) |
 | 2 | **Live API URL** — public `/docs` backed by cloud DB | [Azure Swagger UI](https://student-event-pass-manager-api-gxetbzfvfefdakeb.eastus-01.azurewebsites.net/docs) |
 | 3 | **Live client URL** — talks to **deployed** API, not localhost | [Vercel client](https://student-event-pass-manager-api.vercel.app/) |
-| 4 | **Slide deck** (PDF or shared Slides/PowerPoint link) | *You upload per syllabus; use the outline below.* |
+
 
 ### Client generation tool (README deliverable)
 
