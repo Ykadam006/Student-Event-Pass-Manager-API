@@ -17,9 +17,6 @@ create table if not exists public.event_passes (
 
 alter table public.event_passes enable row level security;
 
--- Server uses the service role key and bypasses RLS. No public policies needed for the API.
--- If you ever query this table from the browser with the anon key, add explicit policies.
-
 insert into public.event_passes (
   id, event_name, category, venue, event_date, capacity, registered_count, pass_type
 ) values
