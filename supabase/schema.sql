@@ -1,6 +1,3 @@
--- Run this in Supabase: SQL Editor → New query → Run
--- Creates event_passes and seeds the five assignment records (idempotent).
-
 create table if not exists public.event_passes (
   id text primary key,
   event_name text not null,
