@@ -115,7 +115,7 @@ student-event-pass-manager-api/
 
 1. [Supabase dashboard](https://supabase.com/dashboard) → **SQL Editor** → run **`supabase/schema.sql`** (idempotent).
 2. **Project Settings → API:** copy **URL** and **service_role** key for the server only.
-3. For final rubric evidence (3 related tables + indexes), run **`supabase/schema_v2.sql`** and review **`docs/database-schema.md`**.
+3. For final rubric evidence (3 related tables + indexes), run **`supabase/schema_v2.sql`**.
 
 ### Table `public.event_passes`
 
@@ -236,13 +236,6 @@ This project now supports both transports on the same backend:
 
 - Schema: `src/graphql/schema.ts`
 - Resolvers: `src/graphql/resolvers.ts`
-- Examples: `docs/graphql-examples.md`
-- Architecture notes: `docs/architecture.md`
-- REST vs GraphQL comparison: `docs/performance-comparison.md`
-- Phase-2 integration docs: `docs/phase2-integrations.md`
-- Final report: `docs/final-report.md`
-- Demo script: `docs/demo-script.md`
-- Database ERD: `docs/database-schema.md`
 - Relational schema (3-table model): `supabase/schema_v2.sql`
 
 ### Testing
@@ -257,3 +250,133 @@ Test files:
 
 - `src/tests/rest.test.ts`
 - `src/tests/graphql.test.ts`
+
+---
+
+## Architecture
+
+- REST handlers (`src/handlers`) and GraphQL resolvers (`src/graphql/resolvers.ts`) both call the same service layer (`src/services`).
+- Service layer wraps validation, business rules, and data access.
+- Event data persists in Supabase via `src/store/eventPasses.ts`.
+- GraphQL student/registration relationship data is in `src/data`, and registration mutations update event counts through `event.service`.
+
+### Layering
+
+1. Transport layer: OpenAPI routes + `/graphql`
+2. Application layer: services (`event`, `registration`, `student`, `insight`, `tracking`, `recommendation`)
+3. Data layer: Supabase store + in-memory relationship data for GraphQL joins
+
+## GraphQL examples
+
+Endpoint: `POST /graphql`
+
+```graphql
+query GetEvents {
+  events {
+    id
+    title
+    location
+    eventDate
+    capacity
+    registeredCount
+    availableSeats
+    status
+  }
+}
+```
+
+```graphql
+query FilterEvents {
+  events(filter: { status: UPCOMING, search: "backend" }, pagination: { limit: 5, offset: 0 }) {
+    id
+    title
+    location
+    availableSeats
+    status
+  }
+}
+```
+
+```graphql
+query CapacityInsights {
+  capacityInsights {
+    totalEvents
+    totalCapacity
+    totalRegistered
+    totalAvailableSeats
+    averageFillRate
+    fullEvents
+  }
+}
+```
+
+```graphql
+mutation CreateEvent {
+  createEvent(input: { title: "Backend API Workshop", location: "Illinois Tech", eventDate: "2026-05-10", capacity: 50 }) {
+    id
+    title
+    capacity
+    availableSeats
+    status
+  }
+}
+```
+
+## Phase-2 integrations
+
+- `GET /{id}/tracking` via `EventPassService_tracking` and `src/services/tracking.service.ts` (`MockShip API`).
+- `GET /students/{studentId}/recommendations` via `StudentService_recommendations` and `src/services/recommendation.service.ts` (`Mock Recommendation API`).
+- Invalid IDs return 404 with explicit messages.
+
+## Database ERD (3-table model)
+
+```mermaid
+erDiagram
+  STUDENTS ||--o{ REGISTRATIONS : registers
+  EVENTS ||--o{ REGISTRATIONS : contains
+```
+
+Full SQL: `supabase/schema_v2.sql`
+
+## REST vs GraphQL comparison
+
+REST uses multiple resource endpoints (`/`, `/{id}`, `/capacity-insights`), while GraphQL uses one endpoint (`/graphql`) and lets clients request only required fields. In this project, REST fits contract-first operations and Swagger tooling; GraphQL fits flexible field selection, nested relationships, and filter/pagination in one query.
+
+## Final demo script (3-5 minutes)
+
+1. Show repository structure and layered architecture.
+2. Open `/docs` and run core REST endpoints.
+3. Run integration endpoints (`/{id}/tracking`, `/students/{studentId}/recommendations`).
+4. Run GraphQL queries/mutations (`events`, `create/update/delete`, `capacityInsights`).
+5. Show `npm test` output.
+6. Show deployed links and close with REST vs GraphQL comparison.
+
+## Final report notes
+
+### Design decisions
+- Kept contract-first REST as source of truth (OpenAPI).
+- Added GraphQL alongside REST (not replacement).
+- Reused common service layer for REST and GraphQL.
+
+### Challenges and solutions
+- Kept REST stable during GraphQL integration by introducing `src/app.ts` composition root.
+- Added deterministic `NODE_ENV=test` store behavior for test isolation.
+- Centralized validation/business rules in services to avoid duplicated logic.
+
+### Security and future improvements
+- OpenAPI validation enabled, explicit CORS, env-based secrets.
+- Future scope: auth (JWT), DataLoader, cursor pagination, real provider integrations, richer monitoring.
+
+## Submission checklist
+
+- [x] GitHub repository link
+- [x] Live deployed API URL
+- [x] Swagger/OpenAPI docs URL
+- [x] GraphQL endpoint (`/graphql`)
+- [x] REST + GraphQL source code
+- [x] GraphQL schema + examples
+- [x] Architecture + performance comparison in this README
+- [x] Automated test files
+- [ ] Test result screenshots
+- [ ] REST/GraphQL success screenshots
+- [ ] Exported Postman collection

@@ -32,6 +32,10 @@ const linkDocs = document.getElementById("link-docs") as HTMLAnchorElement;
 const graphqlQueryEl = document.getElementById("graphql-query") as HTMLTextAreaElement;
 const stepButtons = Array.from(document.querySelectorAll(".step-btn")) as HTMLButtonElement[];
 const stepPanels = Array.from(document.querySelectorAll(".step-panel")) as HTMLElement[];
+const getIdEl = document.getElementById("get-id") as HTMLInputElement;
+const deleteIdEl = document.getElementById("delete-id") as HTMLInputElement;
+const trackIdEl = document.getElementById("track-id") as HTMLInputElement;
+const updateIdEl = document.querySelector('input[name="id"]') as HTMLInputElement;
 
 apiBaseEl.textContent = activeBaseUrl || "(no baseUrl)";
 linkDocs.href = `${activeBaseUrl}/docs`;
@@ -72,6 +76,34 @@ function showResult(title: string, body: unknown, ok: boolean): void {
   setOutputTag(ok ? "ok" : "err", ok ? "Success" : "Error");
 }
 
+function collectEventIds(payload: unknown): string[] {
+  const found = new Set<string>();
+  const walk = (node: unknown): void => {
+    if (!node || typeof node !== "object") return;
+    if (Array.isArray(node)) {
+      for (const item of node) walk(item);
+      return;
+    }
+    const obj = node as Record<string, unknown>;
+    if (typeof obj.id === "string" && (obj.id.startsWith("evt_") || obj.id.length > 0)) {
+      found.add(obj.id);
+    }
+    for (const value of Object.values(obj)) walk(value);
+  };
+  walk(payload);
+  return Array.from(found);
+}
+
+function autoFillEventIdsFromPayload(payload: unknown): void {
+  const ids = collectEventIds(payload);
+  if (ids.length === 0) return;
+  const latest = ids[0];
+  getIdEl.value = latest;
+  deleteIdEl.value = latest;
+  trackIdEl.value = latest;
+  updateIdEl.value = latest;
+}
+
 async function runSdkOp(
   label: string,
   fn: () => Promise<{ error?: unknown; data?: unknown } | Record<string, unknown>>
@@ -86,6 +118,7 @@ async function runSdkOp(
     }
     const data = "data" in res ? (res as { data: unknown }).data : res;
     showResult(`${label} — data`, data, true);
+    autoFillEventIdsFromPayload(data);
   } catch (e) {
     showResult(`${label} — exception`, e instanceof Error ? e.message : String(e), false);
   } finally {
@@ -106,6 +139,7 @@ async function runGraphQLOp(label: string, query: string): Promise<void> {
     const payload = await response.json();
     const ok = response.ok && !payload.errors;
     showResult(`${label} — ${ok ? "data" : "error"}`, payload, ok);
+    if (ok) autoFillEventIdsFromPayload(payload);
   } catch (e) {
     showResult(`${label} — exception`, e instanceof Error ? e.message : String(e), false);
   } finally {
