@@ -1,6 +1,6 @@
 import { Context } from "openapi-backend";
 import { Request, Response } from "express";
-import * as store from "../store/eventPasses";
+import * as eventService from "../services/event.service";
 import { sendServerError } from "./handleError";
 
 export async function EventPassService_list(
@@ -9,7 +9,7 @@ export async function EventPassService_list(
   res: Response
 ): Promise<void> {
   try {
-    const rows = await store.findAll();
+    const rows = await eventService.listEvents(undefined, { limit: 1000, offset: 0 });
     res.status(200).json(rows);
   } catch (err) {
     sendServerError(res, err);

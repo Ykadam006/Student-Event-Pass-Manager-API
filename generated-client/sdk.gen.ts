@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { EventPassServiceCapacityInsightsData, EventPassServiceCapacityInsightsErrors, EventPassServiceCapacityInsightsResponses, EventPassServiceCreateData, EventPassServiceCreateErrors, EventPassServiceCreateResponses, EventPassServiceDeleteData, EventPassServiceDeleteErrors, EventPassServiceDeleteResponses, EventPassServiceGetData, EventPassServiceGetErrors, EventPassServiceGetResponses, EventPassServiceListData, EventPassServiceListErrors, EventPassServiceListResponses, EventPassServiceUpdateData, EventPassServiceUpdateErrors, EventPassServiceUpdateResponses } from './types.gen';
+import type { EventPassServiceCapacityInsightsData, EventPassServiceCapacityInsightsErrors, EventPassServiceCapacityInsightsResponses, EventPassServiceCreateData, EventPassServiceCreateErrors, EventPassServiceCreateResponses, EventPassServiceDeleteData, EventPassServiceDeleteErrors, EventPassServiceDeleteResponses, EventPassServiceGetData, EventPassServiceGetErrors, EventPassServiceGetResponses, EventPassServiceListData, EventPassServiceListErrors, EventPassServiceListResponses, EventPassServiceTrackingData, EventPassServiceTrackingErrors, EventPassServiceTrackingResponses, EventPassServiceUpdateData, EventPassServiceUpdateErrors, EventPassServiceUpdateResponses, StudentServiceRecommendationsData, StudentServiceRecommendationsErrors, StudentServiceRecommendationsResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -95,5 +95,29 @@ export const eventPassServiceUpdate = <ThrowOnError extends boolean = false>(opt
             'Content-Type': 'application/json',
             ...options.headers
         }
+    });
+};
+
+/**
+ * Get tracking status for event logistics
+ *
+ * Returns mocked logistics tracking from a third-party shipping service.
+ */
+export const eventPassServiceTracking = <ThrowOnError extends boolean = false>(options: Options<EventPassServiceTrackingData, ThrowOnError>) => {
+    return (options.client ?? client).get<EventPassServiceTrackingResponses, EventPassServiceTrackingErrors, ThrowOnError>({
+        url: '/{id}/tracking',
+        ...options
+    });
+};
+
+/**
+ * Get personalized event recommendations
+ *
+ * Returns mocked recommendations from a third-party recommendation service.
+ */
+export const studentServiceRecommendations = <ThrowOnError extends boolean = false>(options: Options<StudentServiceRecommendationsData, ThrowOnError>) => {
+    return (options.client ?? client).get<StudentServiceRecommendationsResponses, StudentServiceRecommendationsErrors, ThrowOnError>({
+        url: '/students/{studentId}/recommendations',
+        ...options
     });
 };

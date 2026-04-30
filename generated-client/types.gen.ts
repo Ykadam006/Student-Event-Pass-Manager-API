@@ -182,6 +182,37 @@ export type ErrorResponse = {
 };
 
 /**
+ * Third-party logistics tracking response.
+ */
+export type TrackingInfo = {
+    eventId: string;
+    provider: string;
+    trackingId: string;
+    status: 'CREATED' | 'SCHEDULED' | 'IN_TRANSIT' | 'DELIVERED' | 'DELAYED';
+    estimatedArrival: string;
+    lastUpdated: string;
+};
+
+/**
+ * One recommended event from third-party recommendation service.
+ */
+export type Recommendation = {
+    id: string;
+    title: string;
+    reason: string;
+    score: number;
+};
+
+/**
+ * Recommendation payload for a student.
+ */
+export type RecommendationResponse = {
+    studentId: string;
+    source: string;
+    recommendations: Array<Recommendation>;
+};
+
+/**
  * Represents an event pass record.
  */
 export type EventPassWritable = {
@@ -391,3 +422,63 @@ export type EventPassServiceUpdateResponses = {
 };
 
 export type EventPassServiceUpdateResponse = EventPassServiceUpdateResponses[keyof EventPassServiceUpdateResponses];
+
+export type EventPassServiceTrackingData = {
+    body?: never;
+    path: {
+        /**
+         * Unique identifier of the event pass
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/{id}/tracking';
+};
+
+export type EventPassServiceTrackingErrors = {
+    /**
+     * Event pass not found
+     */
+    404: ErrorResponse;
+};
+
+export type EventPassServiceTrackingError = EventPassServiceTrackingErrors[keyof EventPassServiceTrackingErrors];
+
+export type EventPassServiceTrackingResponses = {
+    /**
+     * Tracking details returned successfully
+     */
+    200: TrackingInfo;
+};
+
+export type EventPassServiceTrackingResponse = EventPassServiceTrackingResponses[keyof EventPassServiceTrackingResponses];
+
+export type StudentServiceRecommendationsData = {
+    body?: never;
+    path: {
+        /**
+         * Unique identifier of the student
+         */
+        studentId: string;
+    };
+    query?: never;
+    url: '/students/{studentId}/recommendations';
+};
+
+export type StudentServiceRecommendationsErrors = {
+    /**
+     * Student not found
+     */
+    404: ErrorResponse;
+};
+
+export type StudentServiceRecommendationsError = StudentServiceRecommendationsErrors[keyof StudentServiceRecommendationsErrors];
+
+export type StudentServiceRecommendationsResponses = {
+    /**
+     * Recommendations returned successfully
+     */
+    200: RecommendationResponse;
+};
+
+export type StudentServiceRecommendationsResponse = StudentServiceRecommendationsResponses[keyof StudentServiceRecommendationsResponses];

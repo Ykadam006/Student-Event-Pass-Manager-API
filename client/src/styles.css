@@ -1,5 +1,3 @@
-/* Campus Event Pass Manager — client UI */
-
 :root {
   --bg: #e8edf2;
   --bg-deep: #1e293b;
@@ -314,6 +312,20 @@ h1 {
   background: #eef2f6;
 }
 
+.step-btn.is-active {
+  background: var(--accent);
+  color: #fff;
+  border-color: transparent;
+}
+
+.step-panel {
+  display: none;
+}
+
+.step-panel.is-active {
+  display: block;
+}
+
 .btn--ghost {
   background: transparent;
   color: var(--accent-hover);
@@ -369,6 +381,7 @@ h1 {
 
 .field input,
 .field select,
+.field textarea,
 .input-grow {
   font-family: var(--font);
   font-size: 0.9rem;
@@ -381,10 +394,19 @@ h1 {
 
 .field input:focus,
 .field select:focus,
+.field textarea:focus,
 .input-grow:focus {
   outline: none;
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.graphql-input {
+  min-height: 180px;
+  resize: vertical;
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  line-height: 1.45;
 }
 
 .delete-row {

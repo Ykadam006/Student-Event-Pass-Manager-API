@@ -21,6 +21,8 @@ tags:
     description: Operations for managing event passes
   - name: Analytics
     description: Capacity and registration insights
+  - name: Integrations
+    description: External service integrations for tracking and recommendations
 
 paths:
   /:
@@ -188,6 +190,60 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: Event pass not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /{id}/tracking:
+    get:
+      tags: [Integrations]
+      summary: Get tracking status for event logistics
+      description: Returns mocked logistics tracking from a third-party shipping service.
+      operationId: EventPassService_tracking
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Unique identifier of the event pass
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Tracking details returned successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TrackingInfo"
+        "404":
+          description: Event pass not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /students/{studentId}/recommendations:
+    get:
+      tags: [Integrations]
+      summary: Get personalized event recommendations
+      description: Returns mocked recommendations from a third-party recommendation service.
+      operationId: StudentService_recommendations
+      parameters:
+        - name: studentId
+          in: path
+          required: true
+          description: Unique identifier of the student
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Recommendations returned successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecommendationResponse"
+        "404":
+          description: Student not found
           content:
             application/json:
               schema:
@@ -383,3 +439,52 @@ components:
         message:
           type: string
           description: Error message
+
+    TrackingInfo:
+      type: object
+      description: Third-party logistics tracking response.
+      required: [eventId, provider, trackingId, status, estimatedArrival, lastUpdated]
+      properties:
+        eventId:
+          type: string
+        provider:
+          type: string
+        trackingId:
+          type: string
+        status:
+          type: string
+          enum: [CREATED, SCHEDULED, IN_TRANSIT, DELIVERED, DELAYED]
+        estimatedArrival:
+          type: string
+          format: date-time
+        lastUpdated:
+          type: string
+          format: date-time
+
+    Recommendation:
+      type: object
+      description: One recommended event from third-party recommendation service.
+      required: [id, title, reason, score]
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        reason:
+          type: string
+        score:
+          type: number
+
+    RecommendationResponse:
+      type: object
+      description: Recommendation payload for a student.
+      required: [studentId, source, recommendations]
+      properties:
+        studentId:
+          type: string
+        source:
+          type: string
+        recommendations:
+          type: array
+          items:
+            $ref: "#/components/schemas/Recommendation"

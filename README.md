@@ -90,6 +90,8 @@ student-event-pass-manager-api/
 | PATCH | `/{id}` | `EventPassService_update` | Partial update |
 | DELETE | `/{id}` | `EventPassService_delete` | Delete |
 | GET | `/capacity-insights` | `EventPassService_capacityInsights` | Capacity analytics |
+| GET | `/{id}/tracking` | `EventPassService_tracking` | Third-party logistics tracking (mock) |
+| GET | `/students/{studentId}/recommendations` | `StudentService_recommendations` | Third-party recommendations (mock) |
 | GET | `/docs` | — | Swagger UI |
 | GET | `/openapi.yaml` | — | Spec (YAML) |
 | GET | `/openapi.json` | — | Spec (JSON) |
@@ -104,6 +106,8 @@ student-event-pass-manager-api/
 | `EventPassService_update` | `EventPassService_update.ts` | `eventPassServiceUpdate` |
 | `EventPassService_delete` | `EventPassService_delete.ts` | `eventPassServiceDelete` |
 | `EventPassService_capacityInsights` | `EventPassService_capacityInsights.ts` | `eventPassServiceCapacityInsights` |
+| `EventPassService_tracking` | `EventPassService_tracking.ts` | (after regenerate client) |
+| `StudentService_recommendations` | `StudentService_recommendations.ts` | (after regenerate client) |
 
 ---
 
@@ -111,6 +115,7 @@ student-event-pass-manager-api/
 
 1. [Supabase dashboard](https://supabase.com/dashboard) → **SQL Editor** → run **`supabase/schema.sql`** (idempotent).
 2. **Project Settings → API:** copy **URL** and **service_role** key for the server only.
+3. For final rubric evidence (3 related tables + indexes), run **`supabase/schema_v2.sql`** and review **`docs/database-schema.md`**.
 
 ### Table `public.event_passes`
 
@@ -208,3 +213,47 @@ I chose this domain because it is practical for a university setting and support
 The main lesson is **order of work**: design **OpenAPI** first, then implement handlers against that contract. The spec became the blueprint for validation, Swagger, and the generated client. Keeping **schemas**, **handlers**, and **types** aligned took discipline; registering **`/docs`**, **`/openapi.yaml`**, and **`/openapi.json`** before the openapi-backend catch-all was essential. **`validate: true`** catches bad bodies and enums before business logic.
 
 Compared with code-first APIs, contract-first feels more disciplined: more upfront design, but a single source of truth that reduces drift between documentation, server, and client.
+
+---
+
+## GraphQL integration (advanced backend capability)
+
+This project now supports both transports on the same backend:
+
+- REST (OpenAPI): existing endpoints remain unchanged
+- GraphQL: `POST /graphql`
+- Shared service layer: REST handlers and GraphQL resolvers both call `src/services/*`
+
+### GraphQL features implemented
+
+- Types, queries, mutations, enums, and input types
+- Filtering and pagination (`events(filter, pagination)`)
+- Relationships (`Event.registrations`, `Registration.student`, `Registration.event`)
+- Calculated fields (`Event.availableSeats`, `Event.status`)
+- Error handling with clear GraphQL errors for invalid IDs and bad input
+
+### GraphQL schema and examples
+
+- Schema: `src/graphql/schema.ts`
+- Resolvers: `src/graphql/resolvers.ts`
+- Examples: `docs/graphql-examples.md`
+- Architecture notes: `docs/architecture.md`
+- REST vs GraphQL comparison: `docs/performance-comparison.md`
+- Phase-2 integration docs: `docs/phase2-integrations.md`
+- Final report: `docs/final-report.md`
+- Demo script: `docs/demo-script.md`
+- Database ERD: `docs/database-schema.md`
+- Relational schema (3-table model): `supabase/schema_v2.sql`
+
+### Testing
+
+Run:
+
+```bash
+npm test
+```
+
+Test files:
+
+- `src/tests/rest.test.ts`
+- `src/tests/graphql.test.ts`

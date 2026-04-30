@@ -1,6 +1,6 @@
 import { Context } from "openapi-backend";
 import { Request, Response } from "express";
-import * as store from "../store/eventPasses";
+import * as eventService from "../services/event.service";
 import { sendServerError } from "./handleError";
 
 export async function EventPassService_delete(
@@ -10,7 +10,7 @@ export async function EventPassService_delete(
 ): Promise<void> {
   try {
     const { id } = c.request.params as { id: string };
-    const deleted = await store.remove(id);
+    const deleted = await eventService.deleteEvent(id);
 
     if (!deleted) {
       res.status(404).json({ code: 404, message: "Event pass not found" });

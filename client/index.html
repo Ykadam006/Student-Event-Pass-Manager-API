@@ -18,12 +18,18 @@
     <div class="app">
       <header class="top">
         <div class="top__intro">
-          <p class="eyebrow">Midterm · OpenAPI generated client</p>
+          <p class="eyebrow">Final · REST + GraphQL client</p>
           <h1>Campus Event Pass Manager</h1>
           <p class="lede">
-            End-to-end demo: this UI calls your REST API only through the
-            <strong>typed SDK</strong> from <code>generated-client/</code> (no hand-written
-            <code>fetch</code> for API routes).
+            End-to-end demo: this UI calls REST through the
+            <strong>typed SDK</strong> from <code>generated-client/</code>, and includes
+            a built-in GraphQL runner for <code>POST /graphql</code>.
+          </p>
+          <p class="lede" style="margin-top: 0.6rem">
+            Follow this order: <strong>1) Test connection</strong> →
+            <strong>2) REST read</strong> → <strong>3) Create</strong> →
+            <strong>4) Update</strong> → <strong>5) Integrations</strong> →
+            <strong>6) Delete</strong> → <strong>7) GraphQL</strong>.
           </p>
         </div>
 
@@ -47,17 +53,34 @@
       <div class="grid">
         <div class="col">
           <section class="card block">
-            <h2 class="block__title">Read &amp; analytics</h2>
-            <p class="block__desc">Uses <code>eventPassServiceList</code> and <code>eventPassServiceCapacityInsights</code>.</p>
+            <h2 class="block__title">Quick Step Switcher</h2>
+            <p class="block__desc">No scrolling needed. Pick one section and test it, then move to the next.</p>
+            <div class="btn-row step-switcher">
+              <button type="button" class="btn btn--secondary step-btn is-active" data-step-target="read">1) REST Read</button>
+              <button type="button" class="btn btn--secondary step-btn" data-step-target="create">2) Create</button>
+              <button type="button" class="btn btn--secondary step-btn" data-step-target="update">3) Update</button>
+              <button type="button" class="btn btn--secondary step-btn" data-step-target="integration">4) Integrations</button>
+              <button type="button" class="btn btn--secondary step-btn" data-step-target="graphql">5) GraphQL</button>
+              <button type="button" class="btn btn--secondary step-btn" data-step-target="delete">6) Delete</button>
+            </div>
+          </section>
+
+          <section class="card block step-panel is-active" data-step-panel="read">
+            <h2 class="block__title">Step 1 — REST Read &amp; analytics</h2>
+            <p class="block__desc">Start here. Uses <code>eventPassServiceList</code>, <code>eventPassServiceGet</code>, and <code>eventPassServiceCapacityInsights</code>.</p>
             <div class="btn-row">
               <button type="button" class="btn btn--primary" id="btn-list">List all passes</button>
               <button type="button" class="btn btn--secondary" id="btn-insights">Capacity insights</button>
             </div>
+            <div class="delete-row" style="margin-top: 0.75rem">
+              <input id="get-id" class="input-grow" type="text" placeholder="Pass id for GET /{id}" autocomplete="off" />
+              <button type="button" class="btn btn--secondary" id="btn-get">Get by ID</button>
+            </div>
           </section>
 
-          <section class="card block">
-            <h2 class="block__title">Create pass</h2>
-            <p class="block__desc">Uses <code>eventPassServiceCreate</code>.</p>
+          <section class="card block step-panel" data-step-panel="create">
+            <h2 class="block__title">Step 2 — Create pass</h2>
+            <p class="block__desc">Create a new event pass using <code>eventPassServiceCreate</code>. Then copy its ID from the response panel for update/delete steps.</p>
             <form id="form-create" class="form">
               <div class="form__grid">
                 <label class="field">
@@ -103,15 +126,119 @@
             </form>
           </section>
 
-          <section class="card block">
-            <h2 class="block__title">Delete pass</h2>
-            <p class="block__desc">Uses <code>eventPassServiceDelete</code>.</p>
+          <section class="card block step-panel" data-step-panel="update">
+            <h2 class="block__title">Step 3 — Update pass</h2>
+            <p class="block__desc">Update using <code>eventPassServiceUpdate</code> (PATCH). Enter ID and only the fields you want to change.</p>
+            <form id="form-update" class="form">
+              <div class="form__grid">
+                <label class="field field--wide">
+                  <span class="field__label">Pass ID (required)</span>
+                  <input name="id" type="text" required placeholder="e.g. evt_001" />
+                </label>
+                <label class="field">
+                  <span class="field__label">Event name</span>
+                  <input name="eventName" type="text" placeholder="Optional" />
+                </label>
+                <label class="field">
+                  <span class="field__label">Category</span>
+                  <select name="category">
+                    <option value="">(no change)</option>
+                    <option value="Workshop">Workshop</option>
+                    <option value="Hackathon">Hackathon</option>
+                    <option value="Seminar">Seminar</option>
+                    <option value="Networking">Networking</option>
+                    <option value="CareerFair">CareerFair</option>
+                  </select>
+                </label>
+                <label class="field field--wide">
+                  <span class="field__label">Venue</span>
+                  <input name="venue" type="text" placeholder="Optional" />
+                </label>
+                <label class="field">
+                  <span class="field__label">Event date</span>
+                  <input name="eventDate" type="date" />
+                </label>
+                <label class="field">
+                  <span class="field__label">Capacity</span>
+                  <input name="capacity" type="number" min="1" placeholder="Optional" />
+                </label>
+                <label class="field">
+                  <span class="field__label">Registered</span>
+                  <input name="registeredCount" type="number" min="0" placeholder="Optional" />
+                </label>
+                <label class="field">
+                  <span class="field__label">Pass type</span>
+                  <select name="passType">
+                    <option value="">(no change)</option>
+                    <option value="Free">Free</option>
+                    <option value="Standard">Standard</option>
+                    <option value="VIP">VIP</option>
+                  </select>
+                </label>
+              </div>
+              <button type="submit" class="btn btn--primary">Update pass</button>
+            </form>
+          </section>
+
+          <section class="card block step-panel" data-step-panel="integration">
+            <h2 class="block__title">Step 4 — Third-party integrations</h2>
+            <p class="block__desc">Run integration endpoints: <code>eventPassServiceTracking</code> and <code>studentServiceRecommendations</code>.</p>
+            <div class="delete-row">
+              <input id="track-id" class="input-grow" type="text" placeholder="Pass id for /{id}/tracking" autocomplete="off" />
+              <button type="button" class="btn btn--secondary" id="btn-track">Get tracking</button>
+            </div>
+            <div class="delete-row" style="margin-top: 0.75rem">
+              <input id="recommend-student-id" class="input-grow" type="text" placeholder="Student id for recommendations (e.g. stu_1)" autocomplete="off" />
+              <button type="button" class="btn btn--secondary" id="btn-recommend">Get recommendations</button>
+            </div>
+          </section>
+
+          <section class="card block step-panel" data-step-panel="graphql">
+            <h2 class="block__title">Step 5 — GraphQL Playground</h2>
+            <p class="block__desc">Run GraphQL queries/mutations against <code>POST /graphql</code> for CRUD + insights + relationship operations.</p>
+            <div class="btn-row">
+              <button type="button" class="btn btn--secondary" id="btn-gql-events">Preset: events</button>
+              <button type="button" class="btn btn--secondary" id="btn-gql-event">Preset: event(id)</button>
+              <button type="button" class="btn btn--secondary" id="btn-gql-update">Preset: updateEvent</button>
+              <button type="button" class="btn btn--secondary" id="btn-gql-delete">Preset: deleteEvent</button>
+              <button type="button" class="btn btn--secondary" id="btn-gql-insights">Preset: capacityInsights</button>
+              <button type="button" class="btn btn--secondary" id="btn-gql-create">Preset: createEvent</button>
+              <button type="button" class="btn btn--secondary" id="btn-gql-students">Preset: students</button>
+            </div>
+            <label class="field" style="margin-top: 0.75rem">
+              <span class="field__label">GraphQL query / mutation</span>
+              <textarea
+                id="graphql-query"
+                class="graphql-input"
+                rows="10"
+                spellcheck="false"
+              >query GetEvents {
+  events {
+    id
+    title
+    location
+    availableSeats
+    status
+  }
+}</textarea>
+            </label>
+            <button type="button" class="btn btn--primary" id="btn-gql-run" style="margin-top: 0.75rem">
+              Run GraphQL
+            </button>
+            <p class="block__desc" style="margin-top: 0.75rem">
+              Note: tracking and recommendations are REST-only integration endpoints in this project.
+            </p>
+          </section>
+
+          <section class="card block step-panel" data-step-panel="delete">
+            <h2 class="block__title">Step 6 — Delete pass (cleanup)</h2>
+            <p class="block__desc">Final cleanup step using <code>eventPassServiceDelete</code>.</p>
             <div class="delete-row">
               <input
                 id="delete-id"
                 class="input-grow"
                 type="text"
-                placeholder="Pass id from list or after create"
+                placeholder="Pass id from create/list response"
                 autocomplete="off"
               />
               <button type="button" class="btn btn--danger" id="btn-delete">Delete</button>

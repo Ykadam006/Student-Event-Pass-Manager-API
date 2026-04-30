@@ -19,6 +19,20 @@ type EventPassRow = {
   pass_type: string;
 };
 
+const isTestMode = process.env.NODE_ENV === "test";
+const testRows: EventPassRow[] = [
+  {
+    id: "evt_seed_1",
+    event_name: "Backend Workshop",
+    category: "Workshop",
+    venue: "Kaplan Institute",
+    event_date: "2026-05-10",
+    capacity: 50,
+    registered_count: 20,
+    pass_type: "Standard",
+  },
+];
+
 function rowToEventPass(row: EventPassRow): EventPass {
   return {
     id: row.id,
@@ -37,6 +51,7 @@ function generateId(): string {
 }
 
 export async function findAll(): Promise<EventPass[]> {
+  if (isTestMode) return testRows.map(rowToEventPass);
   const { data, error } = await getSupabase()
     .from("event_passes")
     .select("*")
@@ -47,6 +62,10 @@ export async function findAll(): Promise<EventPass[]> {
 }
 
 export async function findById(id: string): Promise<EventPass | undefined> {
+  if (isTestMode) {
+    const row = testRows.find((item) => item.id === id);
+    return row ? rowToEventPass(row) : undefined;
+  }
   const { data, error } = await getSupabase()
     .from("event_passes")
     .select("*")
@@ -70,6 +89,11 @@ export async function create(body: EventPassCreate): Promise<EventPass> {
     registered_count: body.registeredCount,
     pass_type: body.passType,
   };
+
+  if (isTestMode) {
+    testRows.push(row);
+    return rowToEventPass(row);
+  }
 
   const { data, error } = await getSupabase()
     .from("event_passes")
@@ -98,6 +122,13 @@ export async function update(
     return findById(id);
   }
 
+  if (isTestMode) {
+    const index = testRows.findIndex((item) => item.id === id);
+    if (index < 0) return undefined;
+    testRows[index] = { ...testRows[index], ...patch };
+    return rowToEventPass(testRows[index]);
+  }
+
   const { data, error } = await getSupabase()
     .from("event_passes")
     .update(patch)
@@ -110,6 +141,12 @@ export async function update(
 }
 
 export async function remove(id: string): Promise<boolean> {
+  if (isTestMode) {
+    const index = testRows.findIndex((item) => item.id === id);
+    if (index < 0) return false;
+    testRows.splice(index, 1);
+    return true;
+  }
   const { data, error } = await getSupabase()
     .from("event_passes")
     .delete()
