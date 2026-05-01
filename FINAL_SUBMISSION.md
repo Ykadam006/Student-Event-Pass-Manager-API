@@ -1,5 +1,7 @@
 # Advanced Backend Development — Final Submission
 
+For full project walkthrough, setup, API details, and screenshot gallery, start from `README.md`.
+
 ## Student and Project Details
 
 - **Student:** Yogesh Kadam

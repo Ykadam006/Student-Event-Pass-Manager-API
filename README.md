@@ -19,6 +19,18 @@ Contract-first **OpenAPI 3.1** REST API (TypeScript, Express, **openapi-backend*
 | **OpenAPI JSON** | https://student-event-pass-manager-api-gxetbzfvfefdakeb.eastus-01.azurewebsites.net/openapi.json |
 | **Live client (static site)** | https://student-event-pass-manager-api.vercel.app/ |
 
+## Reviewer navigation flow
+
+Use this order to review everything quickly from this main README:
+
+1. **Live system links:** use the table above (`/docs`, `/openapi.yaml`, `/graphql`, frontend).
+2. **Implementation scope:** read `What this project delivers` and `API endpoints`.
+3. **Setup and run:** read `Local setup`, `Run API`, `Run browser client`, and `Azure deployment`.
+4. **GraphQL details:** read `GraphQL integration`, `GraphQL examples`, and `Architecture`.
+5. **Submission statement:** open `FINAL_SUBMISSION.md`.
+6. **Screenshot evidence index:** open `screenshots/README.md`.
+7. **Captured screenshots:** review `Screenshots (captured)` at the end of this file.
+
 
 **Client generator (course requirement):** [**@hey-api/openapi-ts**](https://github.com/hey-api/openapi-ts) with [**@hey-api/client-fetch**](https://heyapi.dev). Regenerate with:
 
@@ -367,16 +379,24 @@ REST uses multiple resource endpoints (`/`, `/{id}`, `/capacity-insights`), whil
 - OpenAPI validation enabled, explicit CORS, env-based secrets.
 - Future scope: auth (JWT), DataLoader, cursor pagination, real provider integrations, richer monitoring.
 
-## Submission checklist
+## Screenshots (captured)
 
-- [x] GitHub repository link
-- [x] Live deployed API URL
-- [x] Swagger/OpenAPI docs URL
-- [x] GraphQL endpoint (`/graphql`)
-- [x] REST + GraphQL source code
-- [x] GraphQL schema + examples
-- [x] Architecture + performance comparison in this README
-- [x] Automated test files
-- [ ] Test result screenshots
-- [ ] REST/GraphQL success screenshots
-- [ ] Exported Postman collection
+### Repository and REST docs
+
+![GitHub Repository](screenshots/01-github-repo.png)
+![Swagger Docs](screenshots/02-swagger-docs.png)
+![OpenAPI YAML](screenshots/03-openapi-yaml.png)
+
+### GraphQL operations
+
+![GraphQL List Events](screenshots/04-graphql-list-events.png)
+![GraphQL Get By ID](screenshots/05-graphql-get-by-id.png)
+![GraphQL Create](screenshots/06-graphql-create.png)
+![GraphQL Update](screenshots/07-graphql-update.png)
+![GraphQL Delete](screenshots/08-graphql-delete.png)
+![GraphQL Insights](screenshots/09-graphql-insights.png)
+
+### Integration endpoints
+
+![Tracking Endpoint](screenshots/10-tracking-endpoint.png)
+![Recommendations Endpoint](screenshots/11-recommendations-endpoint.png)

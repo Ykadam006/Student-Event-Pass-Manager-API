@@ -1,0 +1,226 @@
+{
+  "info": {
+    "_postman_id": "c5c3e0f1-0e6b-4e09-bc8e-0b3c5fdf9d2e",
+    "name": "Student Event Pass Manager — REST + GraphQL",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "REST",
+      "item": [
+        {
+          "name": "GET / (list event passes)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/",
+              "host": ["{{baseUrl}}"],
+              "path": [""]
+            }
+          }
+        },
+        {
+          "name": "GET /{id} (get by id)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/{{id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{id}}"]
+            }
+          }
+        },
+        {
+          "name": "POST / (create pass)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"eventName\": \"Backend Demo Day\",\n  \"category\": \"Workshop\",\n  \"venue\": \"Illinois Tech\",\n  \"eventDate\": \"2026-05-10\",\n  \"capacity\": 50,\n  \"registeredCount\": 0,\n  \"passType\": \"Standard\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/",
+              "host": ["{{baseUrl}}"],
+              "path": [""]
+            }
+          }
+        },
+        {
+          "name": "PATCH /{id} (update pass)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"venue\": \"Kaplan Institute\",\n  \"capacity\": 75\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/{{id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{id}}"]
+            }
+          }
+        },
+        {
+          "name": "DELETE /{id} (delete pass)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/{{id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{id}}"]
+            }
+          }
+        },
+        {
+          "name": "GET /capacity-insights",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/capacity-insights",
+              "host": ["{{baseUrl}}"],
+              "path": ["capacity-insights"]
+            }
+          }
+        },
+        {
+          "name": "GET /{id}/tracking",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/{{id}}/tracking",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{id}}", "tracking"]
+            }
+          }
+        },
+        {
+          "name": "GET /students/{studentId}/recommendations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/students/{{studentId}}/recommendations",
+              "host": ["{{baseUrl}}"],
+              "path": ["students", "{{studentId}}", "recommendations"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "GraphQL",
+      "item": [
+        {
+          "name": "POST /graphql (events)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"query { events { id title location availableSeats status } }\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": ["{{baseUrl}}"],
+              "path": ["graphql"]
+            }
+          }
+        },
+        {
+          "name": "POST /graphql (capacityInsights)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"query { capacityInsights { totalEvents totalCapacity totalRegistered totalAvailableSeats averageFillRate fullEvents } }\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": ["{{baseUrl}}"],
+              "path": ["graphql"]
+            }
+          }
+        },
+        {
+          "name": "POST /graphql (createEvent)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"mutation { createEvent(input: { title: \\\"GraphQL Demo Event\\\", location: \\\"Illinois Tech\\\", eventDate: \\\"2026-06-15\\\", capacity: 40 }) { id title capacity availableSeats status } }\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": ["{{baseUrl}}"],
+              "path": ["graphql"]
+            }
+          }
+        },
+        {
+          "name": "POST /graphql (updateEvent)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"mutation { updateEvent(id: \\\"{{eventId}}\\\", input: { location: \\\"Kaplan Hall\\\", capacity: 75 }) { id title location capacity status } }\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": ["{{baseUrl}}"],
+              "path": ["graphql"]
+            }
+          }
+        },
+        {
+          "name": "POST /graphql (deleteEvent)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"mutation { deleteEvent(id: \\\"{{eventId}}\\\") { success message } }\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": ["{{baseUrl}}"],
+              "path": ["graphql"]
+            }
+          }
+        },
+        {
+          "name": "POST /graphql (nested relationship)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"query { event(id: \\\"{{eventId}}\\\") { id title registrations { id status student { id name email } } } }\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": ["{{baseUrl}}"],
+              "path": ["graphql"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" },
+    { "key": "id", "value": "evt_001" },
+    { "key": "studentId", "value": "stu_1" },
+    { "key": "eventId", "value": "evt_001" }
+  ]
+}
+
